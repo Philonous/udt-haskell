@@ -11,6 +11,10 @@ extern "C"  {
     return UDT::socket(af, type, protocol);
   }
 
+  int udt_listen (UDTSOCKET u, int backlog) {
+    return UDT::listen(u,backlog);
+  }
+
   UDTSOCKET udt_accept( UDTSOCKET u
                       , struct sockaddr* addr
                       , int* addrlen ){

@@ -1,5 +1,3 @@
-#include <sys/socket.h>
-
 #ifdef __cplusplus
   #include <udt/udt.h>
   using namespace UDT;
@@ -52,6 +50,8 @@
   UDTSOCKET udt_socket( int af
                       , int type
                       , int protocol );
+
+  int udt_listen (UDTSOCKET u, int backlog);
 
   UDTSOCKET udt_accept( UDTSOCKET u
                       , struct sockaddr* addr

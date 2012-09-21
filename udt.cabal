@@ -1,0 +1,28 @@
+Name:                udt
+Version:             0.1
+License:	     MIT
+Description:
+  Bindings to the UDP-based data transfer (UDT) library
+  http://udt.sourceforge.net/
+Synopsis:	     Bindings to the UDT library
+Author:              Philipp Balzarek
+Maintainer:          p.balzarek@googlemail.com
+Stability:           experimental
+License-File:	     LICENSE
+Category:	     Network
+Build-Type:          Simple
+Cabal-Version:	     >= 1.6
+Library
+  hs-source-dirs:    src
+  Build-Depends:     base >= 4
+                     , network
+  Exposed-modules:   Network.Udt
+
+  Includes:
+  Include-Dirs:	     src/c
+  C-Sources:	     src/c/udt-wrapper.cpp
+                     src/c/helpers.c
+  extra-libraries:   udt stdc++ pthread
+  ghc-options:       -Wall
+  hs-source-dirs:    src
+  build-tools:	     c2hs
