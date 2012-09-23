@@ -16,6 +16,7 @@ Library
   hs-source-dirs:    src
   Build-Depends:     base >= 4
                      , network
+                     , bytestring
   Exposed-modules:   Network.Udt
 
   Includes:

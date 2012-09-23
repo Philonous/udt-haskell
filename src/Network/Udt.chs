@@ -5,8 +5,13 @@
 
 module Network.Udt where
 
+import Data.ByteString(ByteString)
+import Data.ByteString.Unsafe(unsafeUseAsCStringLen)
+import Data.ByteString.Internal(createAndTrim)
+
 import Foreign.Ptr
 import Foreign.C.Types
+import Foreign.C.String
 import Foreign.Marshal.Alloc
 
 import qualified Network.Socket as Socket
@@ -77,12 +82,13 @@ bindSocket _ _ = ioError . userError $ "UDT.bindSocket: Socket hast to be of typ
 {#fun udt_listen as listen {rawSocket `UdtSocket', `Int'} -> `Int' #}
 
 
+accept :: UdtSocket -> IO (Int, Socket.SockAddr)
 accept sock =
   Socket.withNewSockAddr (family sock) $ \addrPtr _bytes ->
   alloca $ \intPtr -> do
       res <- accept'_ (rawSocket sock) addrPtr intPtr
       addr <- Socket.peekSockAddr addrPtr
-      return (res, addr)
+      return (fromIntegral res, addr)
 
 foreign import ccall safe "Network/Udt.chs.h udt_accept"
   accept'_ :: (CInt -> ((Ptr Socket.SockAddr) -> ((Ptr CInt) -> (IO CInt))))
@@ -92,6 +98,51 @@ foreign import ccall safe "Network/Udt.chs.h udt_accept"
 {# fun udt_connect as connect { rawSocket     `UdtSocket'
                         , withSockAddr'* `Socket.SockAddr' &} -> `Int' #}
 
-newtype ErrorInfo = ErrorInfo (Ptr ())
+newtype ErrorInfo = ErrorInfo {fromErrorInfo :: Ptr ()}
 
 {#fun udt_getlasterror as getLastError {} -> `ErrorInfo' ErrorInfo #}
+
+{#fun udt_errorinfo_get_error_code as errorInfoGetGrrorCode
+  {fromErrorInfo `ErrorInfo'} -> `Int' #}
+
+{#fun udt_errorinfo_get_error_message as errorInfoGetErrorMessage
+  {fromErrorInfo `ErrorInfo'} -> `String' #}
+
+{#fun udt_errorinfo_clear as errorInfoClear
+  {fromErrorInfo `ErrorInfo'} -> `()' #}
+
+getPeerName :: UdtSocket -> IO (Int, Socket.SockAddr)
+getPeerName sock =
+  Socket.withNewSockAddr (family sock) $ \addrPtr _bytes ->
+  alloca $ \intPtr -> do
+      res <- getPeerName'_ (rawSocket sock) addrPtr intPtr
+      addr <- Socket.peekSockAddr addrPtr
+      return (fromIntegral res, addr)
+
+foreign import ccall safe "Network/Udt.chs.h udt_getpeername"
+  getPeerName'_ :: (CInt -> ((Ptr Socket.SockAddr) -> ((Ptr CInt) -> (IO CInt))))
+
+
+unsafeUseAsCStringLen' x f = unsafeUseAsCStringLen x
+                             (\(buf, len) -> f (buf, fromIntegral len))
+
+{#fun udt_send as send { rawSocket `UdtSocket'
+                       , unsafeUseAsCStringLen'* `ByteString' &
+                       , `Int'
+                       }
+                       -> `Int' #}
+
+
+recv :: UdtSocket -> Int -> IO ByteString
+recv socket nbytes = do
+  createAndTrim nbytes $ \ptr ->
+      fromIntegral `fmap` {#call udt_recv#} (rawSocket socket)
+                                            (castPtr ptr)
+                                            (fromIntegral nbytes)
+                                            0
+
+-- {# fun udt_recv { rawSocket `UdtSocket'
+--                 ,
+--                  }}
+
+-- SOCKOPT stuff goes here
