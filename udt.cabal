@@ -23,7 +23,7 @@ Library
   Include-Dirs:	     src/c
   C-Sources:	     src/c/udt-wrapper.cpp
                      src/c/helpers.c
-  extra-libraries:   udt stdc++ pthread
-  ghc-options:       -Wall
+  extra-libraries:   udt pthread stdc++
+  ghc-options:       -Wall -threaded
   hs-source-dirs:    src
   build-tools:	     c2hs

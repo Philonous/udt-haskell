@@ -1,5 +1,8 @@
 #include <udt/udt.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "udt-wrapper.h"
+#include <cstdio>
 
 using namespace UDT;
 
@@ -100,7 +103,25 @@ extern "C"  {
     return UDT::recvmsg(u, buf, len);
   }
 
-  int udt_startup() {return UDT::startup();}
+  int udt_startup() {
+    int errval = UDT::ERROR;
+    printf("er %i \n", errval);
+    printf("so %i \n", UDT::INVALID_SOCK);
+    return UDT::startup();;
+  }
+
+  // error values
+  UDTSOCKET udt_invalid_sock(){return UDT::INVALID_SOCK; }
+  int udt_error(){return UDT::ERROR;}
+
+  int udt_setsockopt( UDTSOCKET u
+                    , int level
+                    , SOCKOPT optname
+                    , const void* optval
+                    , int optlen){
+    return UDT::setsockopt(u, level, optname, optval, optlen);
+  }
+
  /* int64_t udt_sendfile(UDTSOCKET u, std::fstream& ifs, int64_t& offset, int64_t size, int block = 364000){} */
  /* int64_t udt_recvfile(UDTSOCKET u, std::fstream& ofs, int64_t& offset, int64_t size, int block = 7280000); */
  /*  int udt_epoll_create() { */

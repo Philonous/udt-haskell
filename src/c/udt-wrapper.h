@@ -3,6 +3,7 @@
   using namespace UDT;
   extern "C"  {
 #else
+  extern const int ERROR;
   enum UDTOpt
   {
      UDT_MSS,             // the Maximum Transfer Unit
@@ -84,12 +85,6 @@
                      , struct sockaddr* name
                      , int* namelen);
 
-  int udt_getsockopt( UDTSOCKET u
-                    , int level
-                    , SOCKOPT optname
-                    , void* optval
-                    , int* optlen);
-
   int udt_send( UDTSOCKET u
               , const char* buf
               , int len
@@ -110,6 +105,21 @@
                  , int len);
 
   int udt_startup();
+
+  int udt_getsockopt( UDTSOCKET u
+                    , int level
+                    , SOCKOPT optname
+                    , void* optval
+                    , int* optlen);
+
+  int udt_setsockopt( UDTSOCKET u
+                    , int level
+                    , SOCKOPT optname
+                    , const void* optval
+                    , int optlen);
+
+  UDTSOCKET udt_invalid_sock();
+  int udt_error();
 
 #ifdef __cplusplus
   } // extern
